@@ -1,0 +1,50 @@
+CREATE TABLE IF NOT EXISTS auth_users (
+    id UUID PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('admin', 'patient')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS patient_profiles (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE REFERENCES auth_users(id) ON DELETE CASCADE,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL DEFAULT '',
+    date_of_birth DATE,
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS doctors (
+    id UUID PRIMARY KEY,
+    full_name TEXT NOT NULL,
+    specialization TEXT NOT NULL DEFAULT '',
+    email TEXT NOT NULL UNIQUE,
+    office TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+    id UUID PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    doctor_id UUID NOT NULL REFERENCES doctors(id) ON DELETE RESTRICT,
+    doctor_name TEXT NOT NULL,
+    patient_id UUID NOT NULL REFERENCES patient_profiles(id) ON DELETE RESTRICT,
+    patient_name TEXT NOT NULL,
+    scheduled_at TIMESTAMPTZ NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('new', 'in_progress', 'done', 'cancelled')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO doctors (id, full_name, specialization, email, office)
+VALUES
+    ('0d7fd15e-0507-4a6a-8cc3-651c01fb9b2f', 'Dr. Aisha Seitkali', 'Cardiology', 'a.seitkali@medsync.local', 'Tower A • 402'),
+    ('5f7fcaef-c675-4b8d-a9cf-966e4ea1dacf', 'Dr. Timur Abdrakhman', 'Neurology', 't.abdrakhman@medsync.local', 'Tower B • 207'),
+    ('4d306f24-2cf4-4d47-b7fc-b7f5551b019d', 'Dr. Dana Mukanova', 'Dermatology', 'd.mukanova@medsync.local', 'Clinic East • 118')
+ON CONFLICT (email) DO NOTHING;

@@ -1,0 +1,53 @@
+groups:
+  - name: medsync-service-availability
+    rules:
+      - alert: MedSyncTargetDown
+        expr: up{job=~"auth-service|patient-service|doctor-service|appointment-service"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          assignment: sre
+        annotations:
+          summary: "{{ $labels.job }} is not reachable by Prometheus"
+          description: "The {{ $labels.job }} metrics endpoint has been down for at least 30 seconds. Check docker compose ps, service logs, and database connectivity."
+
+      - alert: MedSyncMultipleTargetsDown
+        expr: count(up{job=~"auth-service|patient-service|doctor-service|appointment-service"} == 0) >= 2
+        for: 30s
+        labels:
+          severity: critical
+          assignment: sre
+        annotations:
+          summary: "Multiple MedSync services are down"
+          description: "Two or more application targets are unavailable, which can indicate a shared dependency failure such as PostgreSQL or the Docker network."
+
+  - name: medsync-service-quality
+    rules:
+      - alert: MedSyncHighErrorRate
+        expr: |
+          (
+            sum by (service) (rate(medical_platform_http_requests_total{status=~"5.."}[2m]))
+            /
+            clamp_min(sum by (service) (rate(medical_platform_http_requests_total[2m])), 0.001)
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          assignment: sre
+        annotations:
+          summary: "{{ $labels.service }} has elevated 5xx errors"
+          description: "More than 5% of requests are returning server errors for two minutes."
+
+      - alert: MedSyncHighP95Latency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, service) (rate(medical_platform_http_request_duration_seconds_bucket[5m]))
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          assignment: sre
+        annotations:
+          summary: "{{ $labels.service }} p95 latency is above 1 second"
+          description: "The service is responding slowly. Compare request rate, error rate, and logs before deciding whether this is load-related or dependency-related."

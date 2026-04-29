@@ -1,0 +1,8 @@
+go 1.21
+
+use (
+	./appointment-service
+	./auth-service
+	./doctor-service
+	./patient-service
+)

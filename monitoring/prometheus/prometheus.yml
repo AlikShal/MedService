@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/rules.yml
+
+scrape_configs:
+  - job_name: auth-service
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["auth-service:8082"]
+        labels:
+          service: auth-service
+          tier: application
+
+  - job_name: patient-service
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["patient-service:8083"]
+        labels:
+          service: patient-service
+          tier: application
+
+  - job_name: doctor-service
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["doctor-service:8080"]
+        labels:
+          service: doctor-service
+          tier: application
+
+  - job_name: appointment-service
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["appointment-service:8081"]
+        labels:
+          service: appointment-service
+          tier: application

@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		color-scheme: dark;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	body {
+		@apply bg-midnight-950 font-body text-white antialiased;
+	}
+
+	* {
+		@apply border-white/10;
+	}
+
+	::selection {
+		@apply bg-lagoon-400/30 text-white;
+	}
+
+	::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	::-webkit-scrollbar-track {
+		@apply bg-midnight-950;
+	}
+
+	::-webkit-scrollbar-thumb {
+		@apply rounded-full bg-white/10;
+	}
+}
+
+@layer components {
+	.field {
+		@apply w-full rounded-[1.15rem] border border-white/10 bg-midnight-900/[0.65] px-4 py-3 text-sm text-white shadow-inner outline-none transition placeholder:text-slate-500 focus:border-lagoon-400/[0.35] focus:bg-midnight-900 focus:ring-2 focus:ring-lagoon-400/20;
+	}
+}

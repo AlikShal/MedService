@@ -1,0 +1,36 @@
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Build artifacts
+*.exe
+frontend/dist/
+
+# Dependencies
+frontend/node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pub
+
+# Terraform local files
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.exe
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars.backup
+terraform/crash.log
+terraform/crash.*.log
+
+# Keep the assignment example tfvars, but do not store real secret variants.
+terraform/*.auto.tfvars
