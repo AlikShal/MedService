@@ -1,7 +1,6 @@
 package http
 
 import (
-	"database/sql"
 	"doctor-service/internal/usecase"
 	"errors"
 	"net/http"
@@ -163,21 +162,11 @@ func MetricsHandler(c *gin.Context) {
 	promhttp.Handler().ServeHTTP(c.Writer, c.Request)
 }
 
-func HealthHandler(db *sql.DB, serviceName string) gin.HandlerFunc {
+func HealthHandler(serviceName string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := db.Ping(); err != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{
-				"service": serviceName,
-				"status":  "degraded",
-				"error":   err.Error(),
-			})
-			return
-		}
-
 		c.JSON(http.StatusOK, gin.H{
-			"service": serviceName,
 			"status":  "ok",
-			"storage": "postgres",
+			"service": serviceName,
 		})
 	}
 }

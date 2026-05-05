@@ -5,18 +5,18 @@ const config: Config = {
 	theme: {
 		extend: {
 			fontFamily: {
-				display: ["Fraunces", "serif"],
-				body: ["Space Grotesk", "sans-serif"],
+				display: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+				body: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
 			},
 			colors: {
 				midnight: {
-					950: "#08121E",
-					900: "#102338",
-					800: "#183755",
+					950: "#070d19",
+					900: "#0c1422",
+					800: "#111c2e",
 				},
 				lagoon: {
-					500: "#0EA5A3",
-					400: "#38C6BE",
+					500: "#14b8a6",
+					400: "#22d3c5",
 				},
 				coral: {
 					500: "#F26C4F",
@@ -32,12 +32,12 @@ const config: Config = {
 				},
 			},
 			boxShadow: {
-				panel: "0 24px 70px rgba(8, 18, 30, 0.16)",
-				glow: "0 0 0 1px rgba(255,255,255,0.06), 0 24px 60px rgba(7, 14, 24, 0.18)",
+				panel: "0 18px 55px rgba(0, 0, 0, 0.18)",
+				glow: "0 0 0 1px rgba(20,184,166,0.12), 0 18px 45px rgba(20,184,166,0.08)",
 			},
 			backgroundImage: {
 				"mesh-radial":
-					"radial-gradient(circle at top left, rgba(14,165,163,0.16), transparent 30%), radial-gradient(circle at 82% 12%, rgba(242,108,79,0.14), transparent 28%), radial-gradient(circle at 50% 100%, rgba(229,154,46,0.12), transparent 32%)",
+					"linear-gradient(180deg, #070d19 0%, #070d19 100%)",
 			},
 			keyframes: {
 				float: {

@@ -42,6 +42,31 @@ CREATE TABLE IF NOT EXISTS appointments (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS chat_threads (
+    id UUID PRIMARY KEY,
+    appointment_id UUID NOT NULL UNIQUE REFERENCES appointments(id) ON DELETE CASCADE,
+    patient_id UUID NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+    patient_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('open', 'closed')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_message_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id UUID PRIMARY KEY,
+    thread_id UUID NOT NULL REFERENCES chat_threads(id) ON DELETE CASCADE,
+    sender_user_id UUID NOT NULL REFERENCES auth_users(id) ON DELETE CASCADE,
+    sender_role TEXT NOT NULL CHECK (sender_role IN ('admin', 'patient')),
+    sender_name TEXT NOT NULL,
+    body TEXT NOT NULL CHECK (char_length(body) BETWEEN 1 AND 2000),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_threads_patient_id ON chat_threads(patient_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_thread_id_created_at ON chat_messages(thread_id, created_at);
+
 INSERT INTO doctors (id, full_name, specialization, email, office)
 VALUES
     ('0d7fd15e-0507-4a6a-8cc3-651c01fb9b2f', 'Dr. Aisha Seitkali', 'Cardiology', 'a.seitkali@medsync.local', 'Tower A • 402'),

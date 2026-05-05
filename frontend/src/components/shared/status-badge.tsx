@@ -7,13 +7,13 @@ type StatusBadgeProps = {
 };
 
 const palette: Record<string, string> = {
-	new: "border-sun-400/30 bg-sun-500/[0.15] text-sun-200",
-	in_progress: "border-lagoon-400/30 bg-lagoon-500/[0.15] text-lagoon-100",
-	done: "border-emerald-400/30 bg-emerald-500/[0.15] text-emerald-100",
-	cancelled: "border-coral-400/30 bg-coral-500/[0.15] text-coral-100",
-	ok: "border-emerald-400/30 bg-emerald-500/[0.15] text-emerald-100",
-	degraded: "border-sun-400/30 bg-sun-500/[0.15] text-sun-200",
-	down: "border-coral-400/30 bg-coral-500/[0.15] text-coral-100",
+	new: "border-slate-600 bg-slate-800/60 text-slate-200",
+	in_progress: "border-lagoon-500/40 bg-lagoon-500/10 text-lagoon-300",
+	done: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
+	cancelled: "border-rose-400/40 bg-rose-500/10 text-rose-300",
+	ok: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
+	degraded: "border-sun-400/40 bg-sun-500/10 text-sun-300",
+	down: "border-rose-400/40 bg-rose-500/10 text-rose-300",
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

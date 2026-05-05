@@ -61,7 +61,7 @@ export function OperationsPage() {
 				<section className="grid gap-4 xl:grid-cols-4">
 					<StatCard
 						label="Healthy targets"
-						value={`${healthyCount}/${health.length || 4}`}
+						value={`${healthyCount}/${health.length || 5}`}
 						hint="Services healthy according to the UI-level pulse."
 						icon={<DatabaseZap className="h-5 w-5" />}
 					/>

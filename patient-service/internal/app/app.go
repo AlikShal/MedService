@@ -34,7 +34,7 @@ func SetupPatientService() (*gin.Engine, string, error) {
 	r := gin.Default()
 	r.Use(httptransport.MetricsMiddleware(serviceName))
 	r.GET("/metrics", httptransport.MetricsHandler)
-	r.GET("/health", httptransport.HealthHandler(db, serviceName))
+	r.GET("/health", httptransport.HealthHandler(serviceName))
 
 	protected := r.Group("/patients")
 	protected.Use(httptransport.AuthMiddleware(jwtSecret))

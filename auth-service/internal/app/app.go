@@ -43,7 +43,7 @@ func SetupAuthService() (*gin.Engine, string, error) {
 	r := gin.Default()
 	r.Use(httptransport.MetricsMiddleware(serviceName))
 	r.GET("/metrics", httptransport.MetricsHandler)
-	r.GET("/health", httptransport.HealthHandler(db, serviceName))
+	r.GET("/health", httptransport.HealthHandler(serviceName))
 	r.POST("/auth/register", handler.Register)
 	r.POST("/auth/login", handler.Login)
 

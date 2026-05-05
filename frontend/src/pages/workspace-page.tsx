@@ -6,7 +6,9 @@ import {
 	Clock3,
 	ClipboardPlus,
 	HeartHandshake,
+	MessageCircle,
 	Plus,
+	Send,
 	ShieldAlert,
 	Stethoscope,
 	UsersRound,
@@ -18,7 +20,7 @@ import { StatCard } from "../components/shared/stat-card";
 import { StatusBadge } from "../components/shared/status-badge";
 import { api, ApiError } from "../lib/api";
 import { useAuth } from "../providers/auth-provider";
-import type { Appointment, AppointmentStatus, PatientProfile } from "../types/domain";
+import type { Appointment, AppointmentStatus, ChatThread, PatientProfile } from "../types/domain";
 
 function formatDateTime(value: string) {
 	return new Intl.DateTimeFormat(undefined, {
@@ -83,6 +85,8 @@ export function WorkspacePage() {
 		doctor_id: "",
 		scheduled_at: nextDefaultSlot(),
 	});
+	const [selectedThreadId, setSelectedThreadId] = useState("");
+	const [chatMessage, setChatMessage] = useState("");
 
 	const doctorsQuery = useQuery({
 		queryKey: ["doctors"],
@@ -116,6 +120,18 @@ export function WorkspacePage() {
 		refetchInterval: 20000,
 	});
 
+	const chatThreadsQuery = useQuery({
+		queryKey: ["chat-threads", user?.id],
+		enabled: Boolean(token),
+		queryFn: () => api.getChatThreads(token!),
+	});
+
+	const chatMessagesQuery = useQuery({
+		queryKey: ["chat-messages", selectedThreadId],
+		enabled: Boolean(token && selectedThreadId),
+		queryFn: () => api.getChatMessages(selectedThreadId, token!),
+	});
+
 	useEffect(() => {
 		if (doctorsQuery.data?.length && !appointmentForm.doctor_id) {
 			setAppointmentForm((current) => ({
@@ -139,6 +155,12 @@ export function WorkspacePage() {
 			notes: profile.notes,
 		});
 	}, [profileQuery.data, user?.full_name]);
+
+	useEffect(() => {
+		if (!selectedThreadId && chatThreadsQuery.data?.length) {
+			setSelectedThreadId(chatThreadsQuery.data[0].id);
+		}
+	}, [chatThreadsQuery.data, selectedThreadId]);
 
 	const profileMutation = useMutation({
 		mutationFn: (payload: typeof profileForm) => api.upsertProfile(payload, token!),
@@ -199,11 +221,45 @@ export function WorkspacePage() {
 		},
 	});
 
+	const createThreadMutation = useMutation({
+		mutationFn: (appointment: Appointment) =>
+			api.createChatThread(
+				{
+					appointment_id: appointment.id,
+					subject: appointment.title,
+				},
+				token!,
+			),
+		onSuccess: (thread) => {
+			toast.success("Chat thread opened.");
+			setSelectedThreadId(thread.id);
+			void queryClient.invalidateQueries({ queryKey: ["chat-threads", user?.id] });
+		},
+		onError: (error) => {
+			toast.error(error instanceof Error ? error.message : "Unable to open chat thread.");
+		},
+	});
+
+	const sendMessageMutation = useMutation({
+		mutationFn: () => api.sendChatMessage(selectedThreadId, chatMessage, token!),
+		onSuccess: () => {
+			setChatMessage("");
+			void queryClient.invalidateQueries({ queryKey: ["chat-messages", selectedThreadId] });
+			void queryClient.invalidateQueries({ queryKey: ["chat-threads", user?.id] });
+		},
+		onError: (error) => {
+			toast.error(error instanceof Error ? error.message : "Unable to send message.");
+		},
+	});
+
 	const doctors = doctorsQuery.data ?? [];
 	const appointments = appointmentsQuery.data ?? [];
+	const chatThreads = chatThreadsQuery.data ?? [];
+	const chatMessages = chatMessagesQuery.data ?? [];
 	const health = healthQuery.data ?? [];
 	const healthyCount = countHealthyServices(health);
 	const nextAppointment = appointments[0];
+	const selectedThread = chatThreads.find((thread) => thread.id === selectedThreadId);
 
 	const appointmentColumns = useMemo(() => {
 		const map: Record<AppointmentStatus, Appointment[]> = {
@@ -248,7 +304,7 @@ export function WorkspacePage() {
 					/>
 					<StatCard
 						label="Service health"
-						value={`${healthyCount}/${health.length || 4}`}
+						value={`${healthyCount}/${health.length || 5}`}
 						hint="Healthy backend targets visible through the UI."
 						icon={<Activity className="h-5 w-5" />}
 						tone="sun"
@@ -614,6 +670,107 @@ export function WorkspacePage() {
 								))}
 							</div>
 						</section>
+
+						<section className="rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 shadow-panel">
+							<PanelHeader
+								eyebrow="Care chat"
+								title="Appointment conversation"
+								description={
+									isAdmin
+										? "Reply to patient appointment threads from the new chat microservice."
+										: "Open a thread from any appointment and keep the conversation attached to that booking."
+								}
+							/>
+
+							<div className="mt-6 grid gap-4">
+								<div className="flex gap-2 overflow-x-auto pb-1">
+									{chatThreads.length ? (
+										chatThreads.map((thread) => (
+											<button
+												key={thread.id}
+												type="button"
+												onClick={() => setSelectedThreadId(thread.id)}
+												className={`min-w-48 rounded-[1.1rem] border px-4 py-3 text-left text-sm transition ${
+													selectedThreadId === thread.id
+														? "border-lagoon-300/50 bg-lagoon-500/10 text-white"
+														: "border-white/10 bg-midnight-900/60 text-slate-300 hover:border-white/20"
+												}`}
+											>
+												<span className="block font-semibold">{thread.subject}</span>
+												<span className="mt-1 block text-xs text-slate-400">{thread.patient_name}</span>
+											</button>
+										))
+									) : (
+										<div className="rounded-[1.3rem] border border-dashed border-white/10 px-4 py-5 text-sm text-slate-500">
+											{isAdmin ? "No patient conversations yet." : "Open chat from an appointment below."}
+										</div>
+									)}
+								</div>
+
+								<div className="min-h-64 rounded-[1.5rem] border border-white/10 bg-midnight-900/60 p-4">
+									{selectedThread ? (
+										<>
+											<div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+												<div>
+													<h3 className="font-semibold text-white">{selectedThread.subject}</h3>
+													<p className="text-xs text-slate-400">{selectedThread.patient_name}</p>
+												</div>
+												<MessageCircle className="h-5 w-5 text-lagoon-200" />
+											</div>
+											<div className="mt-4 max-h-72 space-y-3 overflow-y-auto pr-1">
+												{chatMessages.length ? (
+													chatMessages.map((message) => (
+														<div
+															key={message.id}
+															className={`rounded-[1.1rem] border border-white/10 p-3 ${
+																message.sender_role === user?.role ? "bg-lagoon-500/10" : "bg-white/5"
+															}`}
+														>
+															<div className="flex items-center justify-between gap-3 text-xs text-slate-400">
+																<span>{message.sender_name}</span>
+																<span>{formatDateTime(message.created_at)}</span>
+															</div>
+															<p className="mt-2 text-sm text-slate-100">{message.body}</p>
+														</div>
+													))
+												) : (
+													<div className="rounded-[1.1rem] border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-500">
+														No messages yet.
+													</div>
+												)}
+											</div>
+											<form
+												className="mt-4 flex gap-2"
+												onSubmit={(event) => {
+													event.preventDefault();
+													sendMessageMutation.mutate();
+												}}
+											>
+												<input
+													className="field"
+													placeholder="Write a message"
+													value={chatMessage}
+													onChange={(event) => setChatMessage(event.target.value)}
+													required
+												/>
+												<button
+													type="submit"
+													disabled={sendMessageMutation.isPending || !chatMessage.trim()}
+													className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-midnight-950 disabled:opacity-50"
+													aria-label="Send message"
+												>
+													<Send className="h-4 w-4" />
+												</button>
+											</form>
+										</>
+									) : (
+										<div className="flex min-h-48 items-center justify-center text-center text-sm text-slate-500">
+											Select or open an appointment chat to start messaging.
+										</div>
+									)}
+								</div>
+							</div>
+						</section>
 					</div>
 				</section>
 
@@ -705,7 +862,7 @@ export function WorkspacePage() {
 														{formatDateTime(appointment.scheduled_at)}
 													</span>
 												</div>
-												<h3 className="font-display text-3xl text-white">{appointment.title}</h3>
+														<h3 className="font-display text-3xl text-white">{appointment.title}</h3>
 												<p className="max-w-3xl text-sm text-slate-300">
 													{appointment.description || "No additional appointment note captured."}
 												</p>
@@ -719,6 +876,15 @@ export function WorkspacePage() {
 													<strong className="mr-2 text-white">Patient</strong>
 													{appointment.patient_name}
 												</div>
+												<button
+													type="button"
+													onClick={() => createThreadMutation.mutate(appointment)}
+													disabled={createThreadMutation.isPending}
+													className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-lagoon-400/30 hover:bg-lagoon-500/10"
+												>
+													<MessageCircle className="h-4 w-4" />
+													Open chat
+												</button>
 											</div>
 										</div>
 									</div>

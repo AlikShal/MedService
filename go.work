@@ -3,6 +3,7 @@ go 1.21
 use (
 	./appointment-service
 	./auth-service
+	./chat-service
 	./doctor-service
 	./patient-service
 )

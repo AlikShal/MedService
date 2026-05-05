@@ -9,24 +9,22 @@ type StatCardProps = {
 };
 
 const toneMap = {
-	lagoon: "from-lagoon-500/20 to-lagoon-400/5 text-lagoon-300",
-	coral: "from-coral-500/20 to-coral-400/5 text-coral-200",
-	sun: "from-sun-500/20 to-sun-400/5 text-sun-200",
+	lagoon: "text-lagoon-400",
+	coral: "text-coral-400",
+	sun: "text-sun-400",
 };
 
 export function StatCard({ label, value, hint, icon, tone = "lagoon" }: StatCardProps) {
 	return (
-		<div
-			className={`rounded-[1.75rem] border border-white/10 bg-gradient-to-br ${toneMap[tone]} p-5 shadow-panel backdrop-blur`}
-		>
+		<div className="lovable-panel p-5">
 			<div className="mb-5 flex items-start justify-between gap-4">
 				<div>
-					<p className="text-xs uppercase tracking-[0.28em] text-slate-400">{label}</p>
-					<p className="mt-3 font-display text-4xl text-white">{value}</p>
+					<p className="lovable-eyebrow">{label}</p>
+					<p className="mt-3 text-3xl font-bold leading-none text-white">{value}</p>
 				</div>
-				<div className="rounded-2xl border border-white/10 bg-white/5 p-3 text-current">{icon}</div>
+				<div className={`rounded-md bg-lagoon-500/10 p-2 ${toneMap[tone]}`}>{icon}</div>
 			</div>
-			<p className="text-sm text-slate-300">{hint}</p>
+			<p className="text-xs leading-5 text-slate-400">{hint}</p>
 		</div>
 	);
 }

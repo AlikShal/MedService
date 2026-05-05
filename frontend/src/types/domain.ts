@@ -50,6 +50,28 @@ export interface Appointment {
 	updated_at: string;
 }
 
+export interface ChatThread {
+	id: string;
+	appointment_id: string;
+	patient_id: string;
+	patient_name: string;
+	subject: string;
+	status: "open" | "closed";
+	created_at: string;
+	updated_at: string;
+	last_message_at?: string;
+}
+
+export interface ChatMessage {
+	id: string;
+	thread_id: string;
+	sender_user_id: string;
+	sender_role: Role;
+	sender_name: string;
+	body: string;
+	created_at: string;
+}
+
 export interface ServiceHealth {
 	service: string;
 	status: "ok" | "degraded" | "down";

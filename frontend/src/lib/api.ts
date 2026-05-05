@@ -2,6 +2,8 @@ import type {
 	Appointment,
 	AppointmentStatus,
 	AuthPayload,
+	ChatMessage,
+	ChatThread,
 	Doctor,
 	PatientProfile,
 	ServiceHealth,
@@ -110,12 +112,33 @@ export const api = {
 		});
 	},
 
+	getChatThreads(token: string) {
+		return request<ChatThread[]>("/api/chat/threads", { token });
+	},
+
+	createChatThread(payload: { appointment_id: string; subject?: string }, token: string) {
+		return request<ChatThread>("/api/chat/threads", { method: "POST", body: payload, token });
+	},
+
+	getChatMessages(threadId: string, token: string) {
+		return request<ChatMessage[]>(`/api/chat/threads/${threadId}/messages`, { token });
+	},
+
+	sendChatMessage(threadId: string, body: string, token: string) {
+		return request<ChatMessage>(`/api/chat/threads/${threadId}/messages`, {
+			method: "POST",
+			body: { body },
+			token,
+		});
+	},
+
 	async getPlatformHealth(): Promise<ServiceHealth[]> {
 		const endpoints = [
 			"/api/health/auth",
 			"/api/health/patient",
 			"/api/health/doctor",
 			"/api/health/appointment",
+			"/api/health/chat",
 		];
 
 		const settled = await Promise.allSettled(

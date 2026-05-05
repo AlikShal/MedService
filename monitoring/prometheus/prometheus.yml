@@ -41,3 +41,12 @@ scrape_configs:
         labels:
           service: appointment-service
           tier: application
+
+  - job_name: chat-service
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["chat-service:8084"]
+        labels:
+          service: chat-service
+          tier: application

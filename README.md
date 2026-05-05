@@ -8,6 +8,7 @@ MedSync is a containerized medical scheduling platform built to satisfy the Assi
 - `patient-service`: patient profile creation and lookup for authenticated users.
 - `doctor-service`: doctor directory with admin-only doctor creation.
 - `appointment-service`: appointment creation, status workflow, doctor validation, and patient validation through service-to-service HTTP calls.
+- `chat-service`: appointment-scoped patient/admin messaging with patient and appointment validation through service-to-service HTTP calls.
 - `frontend`: a polished Nginx-served dashboard that also works as the reverse proxy / gateway.
 - `postgres`: shared database container with service-owned tables.
 - `prometheus` and `grafana`: monitoring and dashboard visualization.
@@ -23,9 +24,12 @@ Frontend + Nginx Gateway
         +--> patient-service
         +--> doctor-service
         +--> appointment-service
+        +--> chat-service
 
 appointment-service --> doctor-service
 appointment-service --> patient-service
+chat-service --> appointment-service
+chat-service --> patient-service
 
 All services --> PostgreSQL
 Prometheus --> Service /metrics endpoints

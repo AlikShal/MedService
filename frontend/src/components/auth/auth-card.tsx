@@ -45,30 +45,32 @@ export function AuthCard() {
 	});
 
 	return (
-		<div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.08] shadow-panel backdrop-blur-2xl">
-			<div className="border-b border-white/10 px-6 py-5">
-				<div className="inline-flex items-center gap-2 rounded-full border border-lagoon-400/20 bg-lagoon-500/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-lagoon-200">
+		<div className="lovable-panel overflow-hidden">
+			<div className="px-6 pb-3 pt-5">
+				<div className="inline-flex items-center gap-2 rounded-full border border-lagoon-500/30 bg-lagoon-500/10 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.2em] text-lagoon-400">
 					<ShieldCheck className="h-3.5 w-3.5" />
 					Secure access
 				</div>
-				<h3 className="mt-4 font-display text-3xl text-white">Step into the control center</h3>
-				<p className="mt-2 text-sm text-slate-300">
+				<h3 className="mt-4 text-2xl font-extrabold leading-tight text-white">
+					Step into the control center
+				</h3>
+				<p className="mt-2 text-sm leading-6 text-slate-400">
 					Patients can onboard and book visits. Admins can orchestrate doctors and appointments.
 				</p>
 			</div>
 
-			<div className="px-6 pt-5">
-				<div className="grid grid-cols-2 gap-2 rounded-full border border-white/10 bg-white/5 p-1">
+			<div className="px-6 pt-3">
+				<div className="grid grid-cols-2 rounded-lg border border-slate-800 bg-[#0a111f] p-1">
 					{(["login", "register"] as Mode[]).map((candidate) => (
 						<button
 							key={candidate}
 							type="button"
 							onClick={() => setMode(candidate)}
 							className={cn(
-								"rounded-full px-4 py-2 text-sm font-medium capitalize transition",
+								"rounded-md px-4 py-2 text-sm font-semibold capitalize transition",
 								mode === candidate
-									? "bg-white text-midnight-950"
-									: "text-slate-300 hover:text-white",
+									? "bg-white text-[#061016]"
+									: "text-slate-500 hover:text-slate-200",
 							)}
 						>
 							{candidate}
@@ -86,7 +88,7 @@ export function AuthCard() {
 			>
 				{mode === "register" ? (
 					<div className="space-y-2">
-						<label className="text-xs uppercase tracking-[0.25em] text-slate-400">Full name</label>
+						<label className="lovable-eyebrow">Full name</label>
 						<input
 							value={registerForm.full_name}
 							onChange={(event) =>
@@ -100,7 +102,7 @@ export function AuthCard() {
 				) : null}
 
 				<div className="space-y-2">
-					<label className="text-xs uppercase tracking-[0.25em] text-slate-400">Email</label>
+					<label className="lovable-eyebrow">Email</label>
 					<input
 						type="email"
 						value={mode === "login" ? loginForm.email : registerForm.email}
@@ -119,7 +121,7 @@ export function AuthCard() {
 				</div>
 
 				<div className="space-y-2">
-					<label className="text-xs uppercase tracking-[0.25em] text-slate-400">Password</label>
+					<label className="lovable-eyebrow">Password</label>
 					<input
 						type="password"
 						value={mode === "login" ? loginForm.password : registerForm.password}
@@ -141,19 +143,21 @@ export function AuthCard() {
 				<button
 					type="submit"
 					disabled={mutation.isPending}
-					className="group inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-lagoon-400 via-lagoon-500 to-coral-500 bg-[length:200%_200%] px-5 py-3 text-sm font-semibold text-midnight-950 transition hover:animate-shine disabled:cursor-not-allowed disabled:opacity-60"
+					className="lovable-button group w-full"
 				>
 					{mutation.isPending ? "Processing..." : mode === "login" ? "Open workspace" : "Create patient account"}
 					<ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
 				</button>
 
-				<div className="rounded-[1.4rem] border border-white/10 bg-midnight-900/60 p-4">
-					<p className="text-xs uppercase tracking-[0.22em] text-slate-500">Demo admin access</p>
+				<div className="rounded-lg border border-slate-800 bg-[#0a111f]/80 p-4">
+					<p className="lovable-eyebrow">Demo admin access</p>
 					<div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-200">
-						<span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+						<span className="rounded-md border border-slate-800 bg-[#070d19] px-3 py-1 font-semibold text-white">
 							admin@medsync.local
 						</span>
-						<span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">admin123</span>
+						<span className="rounded-md border border-slate-800 bg-[#070d19] px-3 py-1 font-semibold text-white">
+							admin123
+						</span>
 					</div>
 				</div>
 			</form>

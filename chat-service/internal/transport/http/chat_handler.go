@@ -1,8 +1,7 @@
 package http
 
 import (
-	"auth-service/internal/model"
-	"auth-service/internal/usecase"
+	"chat-service/internal/usecase"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -15,73 +14,72 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type AuthHandler struct {
-	usecase usecase.AuthUsecase
-}
-
-func NewAuthHandler(usecase usecase.AuthUsecase) *AuthHandler {
-	return &AuthHandler{usecase: usecase}
-}
-
-func (h *AuthHandler) Register(c *gin.Context) {
-	var req struct {
-		FullName string `json:"full_name" binding:"required"`
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	result, err := h.usecase.Register(req.FullName, req.Email, req.Password)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, result)
-}
-
-func (h *AuthHandler) Login(c *gin.Context) {
-	var req struct {
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	result, err := h.usecase.Login(req.Email, req.Password)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, result)
-}
-
-func (h *AuthHandler) Me(c *gin.Context) {
-	claimsValue, exists := c.Get(claimsContextKey)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "missing auth context"})
-		return
-	}
-
-	claims := claimsValue.(*usecase.Claims)
-	user, err := h.usecase.GetUserByID(claims.UserID)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"user": user.Sanitize()})
-}
-
 const claimsContextKey = "auth_claims"
+
+type ChatHandler struct {
+	usecase usecase.ChatUsecase
+}
+
+func NewChatHandler(usecase usecase.ChatUsecase) *ChatHandler {
+	return &ChatHandler{usecase: usecase}
+}
+
+func (h *ChatHandler) CreateThread(c *gin.Context) {
+	var req struct {
+		AppointmentID string `json:"appointment_id" binding:"required"`
+		Subject       string `json:"subject"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	thread, err := h.usecase.CreateThread(req.AppointmentID, req.Subject, c.GetHeader("Authorization"), getClaims(c))
+	if err != nil {
+		c.JSON(statusForError(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, thread)
+}
+
+func (h *ChatHandler) ListThreads(c *gin.Context) {
+	threads, err := h.usecase.ListThreads(c.GetHeader("Authorization"), getClaims(c))
+	if err != nil {
+		c.JSON(statusForError(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, threads)
+}
+
+func (h *ChatHandler) GetMessages(c *gin.Context) {
+	messages, err := h.usecase.GetMessages(c.Param("id"), c.GetHeader("Authorization"), getClaims(c))
+	if err != nil {
+		c.JSON(statusForError(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, messages)
+}
+
+func (h *ChatHandler) SendMessage(c *gin.Context) {
+	var req struct {
+		Body string `json:"body" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	message, err := h.usecase.SendMessage(c.Param("id"), req.Body, c.GetHeader("Authorization"), getClaims(c))
+	if err != nil {
+		c.JSON(statusForError(err), gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, message)
+}
 
 func AuthMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -100,6 +98,32 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 
 		c.Set(claimsContextKey, claims)
 		c.Next()
+	}
+}
+
+func getClaims(c *gin.Context) *usecase.Claims {
+	value, exists := c.Get(claimsContextKey)
+	if !exists {
+		return nil
+	}
+	claims, _ := value.(*usecase.Claims)
+	return claims
+}
+
+func statusForError(err error) int {
+	if err == nil {
+		return http.StatusOK
+	}
+	message := strings.ToLower(err.Error())
+	switch {
+	case strings.Contains(message, "missing auth"):
+		return http.StatusUnauthorized
+	case strings.Contains(message, "only patients"):
+		return http.StatusForbidden
+	case strings.Contains(message, "not found"):
+		return http.StatusNotFound
+	default:
+		return http.StatusBadRequest
 	}
 }
 
@@ -151,29 +175,6 @@ func HealthHandler(serviceName string) gin.HandlerFunc {
 			"status":  "ok",
 			"service": serviceName,
 		})
-	}
-}
-
-func RequireRoles(allowed ...model.Role) gin.HandlerFunc {
-	allowedRoles := make(map[model.Role]struct{}, len(allowed))
-	for _, role := range allowed {
-		allowedRoles[role] = struct{}{}
-	}
-
-	return func(c *gin.Context) {
-		value, exists := c.Get(claimsContextKey)
-		if !exists {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing auth context"})
-			return
-		}
-
-		claims := value.(*usecase.Claims)
-		if _, ok := allowedRoles[claims.Role]; !ok {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
-			return
-		}
-
-		c.Next()
 	}
 }
 
