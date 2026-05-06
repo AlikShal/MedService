@@ -42,3 +42,12 @@ output "patient_service_health_url" {
   description = "Patient service health endpoint"
   value       = "http://${google_compute_instance.medsync.network_interface[0].access_config[0].nat_ip}:8083/health"
 }
+
+output "infrastructure_summary" {
+  description = "Summary of the provisioned healthcare microservices infrastructure"
+  value = {
+    vm_ip            = google_compute_instance.medsync.network_interface[0].access_config[0].nat_ip
+    db_endpoint      = "postgres:5432"
+    environment_name = var.environment_name
+  }
+}

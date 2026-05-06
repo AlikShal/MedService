@@ -2,7 +2,7 @@ groups:
   - name: medsync-service-availability
     rules:
       - alert: MedSyncTargetDown
-        expr: up{job=~"auth-service|patient-service|doctor-service|appointment-service"} == 0
+        expr: up{job=~"auth-service|patient-service|doctor-service|appointment-service|chat-service"} == 0
         for: 30s
         labels:
           severity: critical
@@ -12,7 +12,7 @@ groups:
           description: "The {{ $labels.job }} metrics endpoint has been down for at least 30 seconds. Check docker compose ps, service logs, and database connectivity."
 
       - alert: MedSyncMultipleTargetsDown
-        expr: count(up{job=~"auth-service|patient-service|doctor-service|appointment-service"} == 0) >= 2
+        expr: count(up{job=~"auth-service|patient-service|doctor-service|appointment-service|chat-service"} == 0) >= 2
         for: 30s
         labels:
           severity: critical

@@ -1,0 +1,41 @@
+Log-Based Troubleshooting Automation Report
+Generated at: 2026-05-06T15:51:27Z
+Log time window inspected per service: 10m
+Log tail lines inspected per service: 500
+
+auth-service restart count: 1
+Service: auth-service
+----------------------------------------
+No database connection failure patterns found.
+No crash or restart-loop log patterns found.
+
+appointment-service restart count: 1
+Service: appointment-service
+----------------------------------------
+No database connection failure patterns found.
+No crash or restart-loop log patterns found.
+
+doctor-service restart count: 0
+Service: doctor-service
+----------------------------------------
+No database connection failure patterns found.
+No crash or restart-loop log patterns found.
+
+patient-service restart count: 1
+Service: patient-service
+----------------------------------------
+No database connection failure patterns found.
+No crash or restart-loop log patterns found.
+
+chat-service restart count: 1
+Service: chat-service
+----------------------------------------
+No database connection failure patterns found.
+No crash or restart-loop log patterns found.
+
+postgres restart count: 0
+Service: postgres
+----------------------------------------
+No database connection failure patterns found.
+No crash or restart-loop log patterns found.
+

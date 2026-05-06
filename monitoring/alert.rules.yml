@@ -1,0 +1,85 @@
+groups:
+  - name: healthcare-service-availability
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"auth-service|appointment-service|doctor-service|patient-service|chat-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "Prometheus cannot scrape {{ $labels.job }} for more than 1 minute."
+
+      - alert: DatabaseDown
+        expr: |
+          absent(pg_up{job="postgres-exporter"})
+          or
+          (pg_up{job="postgres-exporter"} == 0)
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL container is unhealthy or unavailable"
+          description: "Prometheus cannot confirm PostgreSQL connectivity through postgres-exporter."
+
+  - name: healthcare-service-resources
+    rules:
+      - alert: HighCPUUsage
+        expr: |
+          sum by (container_label_com_docker_compose_service) (
+            rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"auth-service|appointment-service|doctor-service|patient-service|chat-service"}[2m])
+          ) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.container_label_com_docker_compose_service }} CPU usage is above 80%"
+          description: "Container CPU usage has remained above 80% for more than 2 minutes."
+
+      - alert: ContainerRestarting
+        expr: |
+          changes(container_start_time_seconds{container_label_com_docker_compose_service=~"auth-service|appointment-service|doctor-service|patient-service|chat-service"}[5m]) > 3
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.container_label_com_docker_compose_service }} is restarting frequently"
+          description: "The container restarted more than 3 times in the last 5 minutes."
+
+  - name: healthcare-service-quality
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum by (service) (
+              rate(medical_platform_http_requests_total{status=~"5..|Internal Server Error|Not Implemented|Bad Gateway|Service Unavailable|Gateway Timeout|HTTP Version Not Supported|Variant Also Negotiates|Insufficient Storage|Loop Detected|Not Extended|Network Authentication Required"}[1m])
+            )
+            /
+            clamp_min(
+              sum by (service) (
+                rate(medical_platform_http_requests_total[1m])
+              ),
+              1
+            )
+          ) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.service }} has a high 5xx error rate"
+          description: "More than 5% of requests are returning HTTP 5xx errors for more than 1 minute."
+
+      - alert: AppointmentServiceHighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(medical_platform_http_request_duration_seconds_bucket{service="appointment-service"}[5m])
+            )
+          ) > 2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "appointment-service p95 latency is above 2 seconds"
+          description: "The appointment-service p95 response time is above 2 seconds for more than 1 minute."

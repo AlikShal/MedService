@@ -86,7 +86,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "up{job=~\"auth-service|patient-service|doctor-service|appointment-service\"}",
+          "expr": "up{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service\"}",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
@@ -145,7 +145,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "count(up{job=~\"auth-service|patient-service|doctor-service|appointment-service\"} == 0)",
+          "expr": "count(up{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service\"} == 0)",
           "legendFormat": "down targets",
           "range": true,
           "refId": "A"
@@ -552,7 +552,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "scrape_duration_seconds{job=~\"auth-service|patient-service|doctor-service|appointment-service\"}",
+          "expr": "scrape_duration_seconds{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service\"}",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
