@@ -139,6 +139,7 @@ export const api = {
 			"/api/health/doctor",
 			"/api/health/appointment",
 			"/api/health/chat",
+			"/api/health/notification",
 		];
 
 		const settled = await Promise.allSettled(

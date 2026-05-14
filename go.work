@@ -5,5 +5,6 @@ use (
 	./auth-service
 	./chat-service
 	./doctor-service
+	./notification-service
 	./patient-service
 )

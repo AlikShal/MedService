@@ -202,6 +202,30 @@ services:
     networks:
       - medsync
 
+  notification-service:
+    build: ./notification-service
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      PORT: 8085
+      SERVICE_NAME: notification-service
+      LOG_LEVEL: info
+      NOTIFICATION_DELAY_MS: 150
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8085/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128m
+    networks:
+      - medsync
+
   frontend:
     build: ./frontend
     restart: unless-stopped
@@ -233,16 +257,6 @@ services:
     depends_on:
       postgres-exporter:
         condition: service_started
-      auth-service:
-        condition: service_healthy
-      patient-service:
-        condition: service_healthy
-      doctor-service:
-        condition: service_healthy
-      appointment-service:
-        condition: service_healthy
-      chat-service:
-        condition: service_healthy
     networks:
       - medsync
 
@@ -259,16 +273,6 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
-      auth-service:
-        condition: service_healthy
-      patient-service:
-        condition: service_healthy
-      doctor-service:
-        condition: service_healthy
-      appointment-service:
-        condition: service_healthy
-      chat-service:
-        condition: service_healthy
       prometheus:
         condition: service_started
     networks:

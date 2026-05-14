@@ -129,6 +129,7 @@ if [[ -s "$ENV_FILE" && -s "$EXAMPLE_FILE" ]]; then
     DOCTOR_SERVICE_URL
     PATIENT_SERVICE_URL
     CHAT_SERVICE_URL
+    NOTIFICATION_SERVICE_URL
   )
 
   for key in "${CRITICAL_KEYS[@]}"; do

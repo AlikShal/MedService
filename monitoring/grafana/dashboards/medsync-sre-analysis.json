@@ -86,7 +86,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "up{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service\"}",
+          "expr": "up{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service|notification-service\"}",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
@@ -145,7 +145,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "count(up{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service\"} == 0)",
+          "expr": "count(up{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service|notification-service\"} == 0)",
           "legendFormat": "down targets",
           "range": true,
           "refId": "A"
@@ -552,13 +552,57 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "scrape_duration_seconds{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service\"}",
+          "expr": "scrape_duration_seconds{job=~\"auth-service|patient-service|doctor-service|appointment-service|chat-service|notification-service\"}",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Prometheus Scrape Duration",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum by (path, status) (rate(medical_platform_http_requests_total{service=\"notification-service\"}[5m]))",
+          "legendFormat": "{{path}} {{status}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Notification Traffic by Path and Status",
       "type": "timeseries"
     }
   ],

@@ -2,7 +2,7 @@ groups:
   - name: healthcare-service-availability
     rules:
       - alert: ServiceDown
-        expr: up{job=~"auth-service|appointment-service|doctor-service|patient-service|chat-service"} == 0
+        expr: up{job=~"auth-service|appointment-service|doctor-service|patient-service|chat-service|notification-service"} == 0
         for: 1m
         labels:
           severity: critical
@@ -27,7 +27,7 @@ groups:
       - alert: HighCPUUsage
         expr: |
           sum by (container_label_com_docker_compose_service) (
-            rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"auth-service|appointment-service|doctor-service|patient-service|chat-service"}[2m])
+            rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service=~"auth-service|appointment-service|doctor-service|patient-service|chat-service|notification-service"}[2m])
           ) > 0.8
         for: 2m
         labels:
@@ -38,7 +38,7 @@ groups:
 
       - alert: ContainerRestarting
         expr: |
-          changes(container_start_time_seconds{container_label_com_docker_compose_service=~"auth-service|appointment-service|doctor-service|patient-service|chat-service"}[5m]) > 3
+          changes(container_start_time_seconds{container_label_com_docker_compose_service=~"auth-service|appointment-service|doctor-service|patient-service|chat-service|notification-service"}[5m]) > 3
         for: 0m
         labels:
           severity: warning
@@ -83,3 +83,18 @@ groups:
         annotations:
           summary: "appointment-service p95 latency is above 2 seconds"
           description: "The appointment-service p95 response time is above 2 seconds for more than 1 minute."
+
+      - alert: NotificationServiceHighLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(medical_platform_http_request_duration_seconds_bucket{service="notification-service"}[5m])
+            )
+          ) > 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "notification-service p95 latency is above 1 second"
+          description: "The notification-service p95 response time is above 1 second for more than 1 minute."

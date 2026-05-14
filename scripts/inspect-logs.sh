@@ -13,6 +13,7 @@ SERVICES=(
   doctor-service
   patient-service
   chat-service
+  notification-service
   postgres
 )
 
