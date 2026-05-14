@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: medsync
+data:
+  medsync-overview.json: |
+    {
+      "dashboard": {
+        "title": "MedSync Platform Overview",
+        "panels": [],
+        "schemaVersion": 27,
+        "style": "dark",
+        "tags": ["medsync"]
+      }
+    }

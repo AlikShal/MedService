@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-service
+  namespace: medsync
+  labels:
+    app: chat-service
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8084
+    targetPort: 8084
+    name: http
+  selector:
+    app: chat-service

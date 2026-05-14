@@ -1,0 +1,7 @@
+- name: Prepare MedSync environment
+  hosts: local
+  gather_facts: no
+  vars:
+    project_root: "{{ playbook_dir }}/../.."
+  roles:
+    - environment

@@ -1,0 +1,18 @@
+- name: Ensure Docker Compose application dependencies are available
+  ansible.builtin.command:
+    cmd: docker compose config
+    chdir: "{{ project_root }}"
+  register: compose_validation
+  changed_when: false
+
+- name: Start MedSync application stack with Docker Compose
+  ansible.builtin.command:
+    cmd: docker compose up -d --build
+    chdir: "{{ project_root }}"
+  register: compose_up
+
+- name: Restart Docker Compose stack services
+  ansible.builtin.command:
+    cmd: docker compose restart
+    chdir: "{{ project_root }}"
+  when: compose_up.changed

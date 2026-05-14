@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: medsync
+  labels:
+    app: auth-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+      - name: auth-service
+        image: medsync-auth-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8082
+          name: http
+        env:
+        - name: PORT
+          value: "8082"
+        - name: GIN_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: GIN_MODE
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: DB_PORT
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: DB_NAME
+        - name: DB_SSLMODE
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: DB_SSLMODE
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: JWT_SECRET
+        - name: JWT_TTL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: JWT_TTL
+        - name: ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: ADMIN_EMAIL
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: ADMIN_PASSWORD
+        - name: ADMIN_FULL_NAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: ADMIN_FULL_NAME
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3

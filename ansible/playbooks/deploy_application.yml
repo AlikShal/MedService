@@ -1,0 +1,7 @@
+- name: Deploy MedSync application
+  hosts: local
+  gather_facts: no
+  vars:
+    project_root: "{{ playbook_dir }}/../.."
+  roles:
+    - app

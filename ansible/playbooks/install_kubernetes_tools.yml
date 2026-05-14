@@ -1,0 +1,7 @@
+- name: Validate Kubernetes tooling on local host
+  hosts: local
+  gather_facts: no
+  vars:
+    project_root: "{{ playbook_dir }}/../.."
+  roles:
+    - kube_tools

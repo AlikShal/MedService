@@ -1,0 +1,6 @@
+- name: Validate kubectl is available
+  ansible.builtin.command:
+    cmd: kubectl version --client --short
+  register: kubectl_version
+  changed_when: false
+  ignore_errors: yes

@@ -1,0 +1,43 @@
+- name: Ensure project root directory exists
+  ansible.builtin.file:
+    path: "{{ project_root }}"
+    state: directory
+
+- name: Create a sample .env file if missing
+  ansible.builtin.copy:
+    dest: "{{ project_root }}/.env"
+    content: |
+      JWT_SECRET=medical-platform-secret
+      JWT_TTL=24h
+      ADMIN_EMAIL=admin@medsync.local
+      ADMIN_PASSWORD=admin123
+      ADMIN_FULL_NAME=Clinic Administrator
+
+      DB_HOST=postgres
+      DB_PORT=5432
+      DB_NAME=medical_platform
+      DB_USER=postgres
+      DB_PASSWORD=postgres
+      DB_SSLMODE=disable
+
+      AUTH_SERVICE_URL=http://auth-service:8082
+      APPOINTMENT_SERVICE_URL=http://appointment-service:8081
+      DOCTOR_SERVICE_URL=http://doctor-service:8080
+      PATIENT_SERVICE_URL=http://patient-service:8083
+      CHAT_SERVICE_URL=http://chat-service:8084
+      NOTIFICATION_SERVICE_URL=http://notification-service:8085
+
+      GRAFANA_ADMIN_USER=admin
+      GRAFANA_ADMIN_PASSWORD=admin
+    force: no
+    mode: '0644'
+
+- name: Verify required project files exist
+  ansible.builtin.stat:
+    path: "{{ project_root }}/docker-compose.yml"
+  register: compose_file
+
+- name: Fail if docker-compose.yml is missing
+  ansible.builtin.fail:
+    msg: "docker-compose.yml not found in {{ project_root }}"
+  when: not compose_file.stat.exists

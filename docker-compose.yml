@@ -30,6 +30,7 @@ services:
       - medsync
 
   auth-service:
+    image: medsync-auth-service:latest
     build: ./auth-service
     restart: unless-stopped
     environment:
@@ -64,6 +65,7 @@ services:
       - medsync
 
   patient-service:
+    image: medsync-patient-service:latest
     build: ./patient-service
     restart: unless-stopped
     environment:
@@ -96,6 +98,7 @@ services:
       - medsync
 
   doctor-service:
+    image: medsync-doctor-service:latest
     build: ./doctor-service
     restart: unless-stopped
     environment:
@@ -126,6 +129,7 @@ services:
       - medsync
 
   appointment-service:
+    image: medsync-appointment-service:latest
     build: ./appointment-service
     restart: unless-stopped
     environment:
@@ -162,6 +166,7 @@ services:
       - medsync
 
   chat-service:
+    image: medsync-chat-service:latest
     build: ./chat-service
     restart: unless-stopped
     environment:
@@ -198,6 +203,7 @@ services:
       - medsync
 
   notification-service:
+    image: medsync-notification-service:latest
     build: ./notification-service
     restart: unless-stopped
     environment:
@@ -221,6 +227,7 @@ services:
       - medsync
 
   frontend:
+    image: medsync-frontend:latest
     build: ./frontend
     restart: unless-stopped
     ports:

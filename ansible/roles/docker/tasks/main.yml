@@ -1,0 +1,7 @@
+- name: Validate Docker Compose configuration
+  ansible.builtin.command:
+    cmd: docker compose config
+    chdir: "{{ project_root }}"
+  register: docker_compose_config
+  changed_when: false
+  ignore_errors: yes

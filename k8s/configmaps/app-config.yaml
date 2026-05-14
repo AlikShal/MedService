@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: medsync
+data:
+  GIN_MODE: "release"
+  DB_PORT: "5432"
+  DB_SSLMODE: "disable"
+  JWT_TTL: "24h"
+  LOG_LEVEL: "info"
+  NOTIFICATION_DELAY_MS: "150"
+  SERVICE_NAME: "notification-service"
+  # Service URLs for inter-service communication
+  DOCTOR_SERVICE_URL: "http://doctor-service:8080"
+  PATIENT_SERVICE_URL: "http://patient-service:8083"
+  APPOINTMENT_SERVICE_URL: "http://appointment-service:8081"
+  CHAT_SERVICE_URL: "http://chat-service:8084"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:8085"
+  AUTH_SERVICE_URL: "http://auth-service:8082"

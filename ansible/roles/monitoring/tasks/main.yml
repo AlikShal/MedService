@@ -1,0 +1,23 @@
+- name: Validate Kubernetes manifests
+  ansible.builtin.command:
+    cmd: kubectl apply --dry-run=client -f "{{ project_root }}/k8s/"
+  register: kubectl_dry_run
+  changed_when: false
+
+- name: Apply Kubernetes monitoring manifests
+  ansible.builtin.command:
+    cmd: kubectl apply -f "{{ project_root }}/k8s/"
+  register: kubectl_apply
+
+- name: Restart monitoring deployments if needed
+  ansible.builtin.command:
+    cmd: kubectl rollout restart deployment/prometheus -n medsync
+  when: kubectl_apply.changed
+  failed_when: false
+  changed_when: false
+
+- name: Validate monitoring pods
+  ansible.builtin.command:
+    cmd: kubectl get pods -n medsync
+  register: monitoring_pods
+  changed_when: false
