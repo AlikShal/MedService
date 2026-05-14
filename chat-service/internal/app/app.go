@@ -38,7 +38,11 @@ func SetupChatService() (*gin.Engine, string, error) {
 	uc := usecase.NewChatUsecaseImpl(repo, patientClient, appointmentClient)
 	handler := httptransport.NewChatHandler(uc)
 
+	gin.SetMode(getEnv("GIN_MODE", gin.ReleaseMode))
 	r := gin.Default()
+	if err := r.SetTrustedProxies(nil); err != nil {
+		return nil, "", err
+	}
 	r.Use(httptransport.MetricsMiddleware(serviceName))
 	r.GET("/metrics", httptransport.MetricsHandler)
 	r.GET("/health", httptransport.HealthHandler(serviceName))

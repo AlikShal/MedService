@@ -119,11 +119,18 @@ if [[ -s "$ENV_FILE" && -s "$EXAMPLE_FILE" ]]; then
   echo
   echo "Checking critical runtime variables..."
   CRITICAL_KEYS=(
+    JWT_SECRET
+    JWT_TTL
+    ADMIN_EMAIL
+    ADMIN_PASSWORD
+    ADMIN_FULL_NAME
     DB_HOST
     DB_PORT
     DB_NAME
     DB_USER
     DB_PASSWORD
+    GRAFANA_ADMIN_USER
+    GRAFANA_ADMIN_PASSWORD
     AUTH_SERVICE_URL
     APPOINTMENT_SERVICE_URL
     DOCTOR_SERVICE_URL

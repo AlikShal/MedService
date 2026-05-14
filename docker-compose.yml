@@ -4,14 +4,14 @@ services:
     container_name: medsync-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: medical_platform
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d medical_platform"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,7 +22,7 @@ services:
     image: prometheuscommunity/postgres-exporter:v0.15.0
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: postgresql://postgres:postgres@postgres:5432/medical_platform?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
     depends_on:
       postgres:
         condition: service_healthy
@@ -32,21 +32,20 @@ services:
   auth-service:
     build: ./auth-service
     restart: unless-stopped
-    ports:
-      - "8082:8082"
     environment:
       PORT: 8082
+      GIN_MODE: release
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: medical_platform
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       DB_SSLMODE: disable
-      JWT_SECRET: medical-platform-secret
-      JWT_TTL: 24h
-      ADMIN_EMAIL: admin@medsync.local
-      ADMIN_PASSWORD: admin123
-      ADMIN_FULL_NAME: Clinic Administrator
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_TTL: ${JWT_TTL}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_FULL_NAME: ${ADMIN_FULL_NAME}
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,17 +66,16 @@ services:
   patient-service:
     build: ./patient-service
     restart: unless-stopped
-    ports:
-      - "8083:8083"
     environment:
       PORT: 8083
+      GIN_MODE: release
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: medical_platform
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       DB_SSLMODE: disable
-      JWT_SECRET: medical-platform-secret
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -100,17 +98,16 @@ services:
   doctor-service:
     build: ./doctor-service
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     environment:
       PORT: 8080
+      GIN_MODE: release
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: medical_platform
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       DB_SSLMODE: disable
-      JWT_SECRET: medical-platform-secret
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -131,17 +128,16 @@ services:
   appointment-service:
     build: ./appointment-service
     restart: unless-stopped
-    ports:
-      - "8081:8081"
     environment:
       PORT: 8081
+      GIN_MODE: release
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: medical_platform
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       DB_SSLMODE: disable
-      JWT_SECRET: medical-platform-secret
+      JWT_SECRET: ${JWT_SECRET}
       DOCTOR_SERVICE_URL: http://doctor-service:8080
       PATIENT_SERVICE_URL: http://patient-service:8083
     depends_on:
@@ -168,17 +164,16 @@ services:
   chat-service:
     build: ./chat-service
     restart: unless-stopped
-    ports:
-      - "8084:8084"
     environment:
       PORT: 8084
+      GIN_MODE: release
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: medical_platform
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       DB_SSLMODE: disable
-      JWT_SECRET: medical-platform-secret
+      JWT_SECRET: ${JWT_SECRET}
       PATIENT_SERVICE_URL: http://patient-service:8083
       APPOINTMENT_SERVICE_URL: http://appointment-service:8081
     depends_on:
@@ -205,10 +200,9 @@ services:
   notification-service:
     build: ./notification-service
     restart: unless-stopped
-    ports:
-      - "8085:8085"
     environment:
       PORT: 8085
+      GIN_MODE: release
       SERVICE_NAME: notification-service
       LOG_LEVEL: info
       NOTIFICATION_DELAY_MS: 150
@@ -267,8 +261,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro

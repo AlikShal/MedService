@@ -59,17 +59,17 @@ variable "ssh_public_key_path" {
 variable "allowed_ssh_cidr" {
   description = "CIDR block allowed to SSH into the instance"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = "203.0.113.10/32"
 }
 
 variable "monitoring_allowed_cidr" {
   description = "CIDR block allowed to access Grafana and Prometheus"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = "203.0.113.10/32"
 }
 
 variable "backend_allowed_cidr" {
   description = "CIDR block allowed to access demo backend ports 8080-8083"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = "203.0.113.10/32"
 }

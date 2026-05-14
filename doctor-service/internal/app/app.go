@@ -31,7 +31,11 @@ func SetupDoctorService() (*gin.Engine, string, error) {
 	uc := usecase.NewDoctorUsecaseImpl(repo)
 	handler := httptransport.NewDoctorHandler(uc)
 
+	gin.SetMode(getEnv("GIN_MODE", gin.ReleaseMode))
 	r := gin.Default()
+	if err := r.SetTrustedProxies(nil); err != nil {
+		return nil, "", err
+	}
 	r.Use(httptransport.MetricsMiddleware(serviceName))
 	r.GET("/metrics", httptransport.MetricsHandler)
 	r.GET("/health", httptransport.HealthHandler(serviceName))

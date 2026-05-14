@@ -10,7 +10,7 @@ boot_disk_size_gb = 30
 ssh_user            = "alikhan"
 ssh_public_key_path = "C:/Users/Alikhan/.ssh/medsync_gcp.pub"
 
-# For a real demo, replace 0.0.0.0/0 with your own public IP, for example "203.0.113.10/32".
-allowed_ssh_cidr        = "0.0.0.0/0"
-monitoring_allowed_cidr = "0.0.0.0/0"
-backend_allowed_cidr    = "0.0.0.0/0"
+# Restrict access to trusted source CIDRs only.
+allowed_ssh_cidr        = "203.0.113.10/32"
+monitoring_allowed_cidr = "203.0.113.10/32"
+backend_allowed_cidr    = "203.0.113.10/32"
